@@ -44,7 +44,7 @@ extern "C"
     int grayHist(unsigned char* intput_data, int width, int height,float* output_data);
 
     //图像的高斯滤波处理
-    int  gaussianFilter(float* input_data, int width, int height, gradient* gradientResult);
+    int  gaussianFilter2(float* input_data, int width, int height, float* outputResult);
 
 #ifdef __cplusplus
 #if __cplusplus

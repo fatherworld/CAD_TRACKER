@@ -1,8 +1,8 @@
-#include "threeD2twoD.h"
+ï»¿#include "threeD2twoD.h"
 
-//´ËÊ±µÄÊÀ½ç×ø±êÏµ×ª»»µÄÊ±ºòÖ»ĞèÒª½«ÊÀ½ç×ø±êXwºÍYw³ıÒÔZw¾Í¿ÉÒÔÁË
+//æ­¤æ—¶çš„ä¸–ç•Œåæ ‡ç³»è½¬æ¢çš„æ—¶å€™åªéœ€è¦å°†ä¸–ç•Œåæ ‡Xwå’ŒYwé™¤ä»¥Zwå°±å¯ä»¥äº†
 
-//ÈıÎ¬×ø±êµ½¶şÎ¬×ø±êµÄ×ª»»
+//ä¸‰ç»´åæ ‡åˆ°äºŒç»´åæ ‡çš„è½¬æ¢
 int three2two(threespace worldCoords, MARTIX InternalRef, MARTIX OutRef, twospace* pixCoords, float scale)
 {
     int ret = 0;
@@ -19,15 +19,15 @@ int three2two(threespace worldCoords, MARTIX InternalRef, MARTIX OutRef, twospac
     ret= mul_maritx(InternalRef,OutRef,output_martix);
     if (!ret)
     {
-        printf("¾ØÕóÏà³Ë³ö´í");
+        printf("çŸ©é˜µç›¸ä¹˜å‡ºé”™");
     }
     ret = mul_maritx(*output_martix, tempWorldmartix, output_martix);
     if (!ret)
     {
-        printf("¾ØÕóÏà³Ë³ö´í");
+        printf("çŸ©é˜µç›¸ä¹˜å‡ºé”™");
     }
     pixCoords->real_x = output_martix->martix[0];
-    pixCoords->real_x = output_martix->martix[1 * output_martix->cols];
+    pixCoords->real_y = output_martix->martix[1 * output_martix->cols];
 
     if (!tempWorldmartix.martix)
     {
@@ -51,7 +51,7 @@ int three2two(threespace worldCoords, MARTIX InternalRef, MARTIX OutRef, twospac
 
 
 
-//Í¼ÏñµÄ»Ò¶È»¯
+//å›¾åƒçš„ç°åº¦åŒ–
 int picTogray(unsigned char* intput_data, int width, int height, int channels,unsigned char* output_data)
 {
     int ret = 0;
@@ -59,7 +59,7 @@ int picTogray(unsigned char* intput_data, int width, int height, int channels,un
     if (!intput_data)
     {
         ret = -1;
-        printf("ÊäÈëµÄÍ¼Æ¬ĞÅÏ¢²»ÄÜÎª¿Õ");
+        printf("è¾“å…¥çš„å›¾ç‰‡ä¿¡æ¯ä¸èƒ½ä¸ºç©º");
         return ret;
     }
 
@@ -100,14 +100,14 @@ int picTogray(unsigned char* intput_data, int width, int height, int channels,un
 }
 
 
-//Í¼ÏñµÄ¹éÒ»»¯
+//å›¾åƒçš„å½’ä¸€åŒ–
 int grayHist(unsigned char* intput_data, int width, int height, float* output_data)
 {
     int ret = 0;
     if (!intput_data)
     {
         ret = -1;
-        printf("ÊäÈëµÄÍ¼Æ¬²»ÄÜÎª¿Õ");
+        printf("è¾“å…¥çš„å›¾ç‰‡ä¸èƒ½ä¸ºç©º");
         return ret;
     }
     for (int i = 0; i < height; i++)
@@ -119,32 +119,32 @@ int grayHist(unsigned char* intput_data, int width, int height, float* output_da
 }
 
 
-//Í¼ÏñµÄ¸ßË¹´¦Àí£¬»ñÈ¡½á¹û
-int  gaussianFilter(float* input_data, int width, int height, gradient* gradientResult)
+//ç¼“å­˜é«˜æ–¯å¤„ç†ç»“æœ
+static int  gaussianFilter(float* input_data, int width, int height, gradient* gradientResult)
 {
     int ret = 0;
     if (!input_data || !gradientResult)
     {
         ret = -1;
-        printf("ÊäÈë»òÕßÊä³ö²»ÄÜÎª¿Õ");
+        printf("è¾“å…¥æˆ–è€…è¾“å‡ºä¸èƒ½ä¸ºç©º");
         return ret;
     }
 
     MARTIX  Convolve3x;
     
-    //¹¹ÔìÒ»¸ö3*3¸ßË¹ÂË²¨¾í»ı
+    //æ„é€ ä¸€ä¸ª3*3é«˜æ–¯æ»¤æ³¢å·ç§¯
     Convolve3x.cols = 3;
     Convolve3x.rows = 3;
     Convolve3x.martix = (float*)malloc(sizeof(float) * 9);
     Convolve3x.martix[0] = -1.0;
-    Convolve3x.martix[0] = 0.0;
-    Convolve3x.martix[0] = 1.0;
-    Convolve3x.martix[0] = 0.0;
-    Convolve3x.martix[0] = 0.0;
-    Convolve3x.martix[0] = 0.0;
-    Convolve3x.martix[0] = 1.0;
-    Convolve3x.martix[0] = 2.0;
-    Convolve3x.martix[0] = -1.0;
+    Convolve3x.martix[1] = 0.0;
+    Convolve3x.martix[2] = 1.0;
+    Convolve3x.martix[3] = 0.0;
+    Convolve3x.martix[4] = 0.0;
+    Convolve3x.martix[5] = 0.0;
+    Convolve3x.martix[6] = 1.0;
+    Convolve3x.martix[7] = 2.0;
+    Convolve3x.martix[8] = -1.0;
 
     for (int i = 0; i < height; i++)
     {
@@ -175,28 +175,91 @@ int  gaussianFilter(float* input_data, int width, int height, gradient* gradient
                 nxtj = j - 1;
             }
 
-            //±êÖ¾¸ÃµãÔÚ
+            //æ ‡å¿—è¯¥ç‚¹åœ¨
             gradientResult[i*width + j].rows = i;
             gradientResult[i*width + j].cols = j;
-            //¼ÆËãdx
-            gradientResult[i*width + j].dx = Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[1] * input_data[prei*width + j] +
+
+            //è®¡ç®—dx
+            gradientResult[i*width + j].dx =(Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[1] * input_data[prei*width + j] +
                 Convolve3x.martix[2] * input_data[prei*width + nxtj] + Convolve3x.martix[3] * input_data[i*width + prej] + Convolve3x.martix[4] * input_data[i*width + j]
                 + Convolve3x.martix[5] * input_data[i*width + nxtj] + Convolve3x.martix[6] * input_data[nxti*width + prej] + Convolve3x.martix[7] * input_data[nxti*width + j]
-                + Convolve3x.martix[8] * input_data[nxti*width + nxtj];
+                + Convolve3x.martix[8] * input_data[nxti*width + nxtj]);
+            
+// 
+//             float temp2 = Convolve3x.martix[3] * input_data[prei*width + j];
+//             printf("dx result2 is temp2 -> %f", temp2);
+// 
+//             float temp1 = Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[3] * input_data[prei*width + j];
+//             printf("dx result is temp1 -> %f", temp1);
 
-            //¼ÆËãdy
-            gradientResult[i*width + j].dy = Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[3] * input_data[prei*width + j] +
+
+
+            float temp = (Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[3] * input_data[prei*width + j] +
                 Convolve3x.martix[6] * input_data[prei*width + nxtj] + Convolve3x.martix[1] * input_data[i*width + prej] + Convolve3x.martix[4] * input_data[i*width + j]
                 + Convolve3x.martix[7] * input_data[i*width + nxtj] + Convolve3x.martix[2] * input_data[nxti*width + prej] + Convolve3x.martix[5] * input_data[nxti*width + j]
-                + Convolve3x.martix[8] * input_data[nxti*width + nxtj];
+                + Convolve3x.martix[8] * input_data[nxti*width + nxtj]);
+        //    printf("dx result is temp -> %f", temp);
 
 
-            //¼ÆËãÕıÇĞ½Ç
-            gradientResult[i*width + j].angle = atan2(gradientResult[i*width + j].dx, gradientResult[i*width + j].dy);
 
 
-            //¼ÆËãÄ£³¤
+            //è®¡ç®—dy
+            gradientResult[i*width + j].dy = (float)(Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[3] * input_data[prei*width + j] +
+                Convolve3x.martix[6] * input_data[prei*width + nxtj] + Convolve3x.martix[1] * input_data[i*width + prej] + Convolve3x.martix[4] * input_data[i*width + j]
+                + Convolve3x.martix[7] * input_data[i*width + nxtj] + Convolve3x.martix[2] * input_data[nxti*width + prej] + Convolve3x.martix[5] * input_data[nxti*width + j]
+                + Convolve3x.martix[8] * input_data[nxti*width + nxtj]);
+
+
+            //è®¡ç®—æ­£åˆ‡è§’
+            gradientResult[i*width + j].angle =(float)(atan2(gradientResult[i*width + j].dx, gradientResult[i*width + j].dy));
+
+
+            //è®¡ç®—æ¨¡é•¿
             gradientResult[i*width + j].dieLength = (float)sqrt(gradientResult[i*width + j].dx * gradientResult[i*width + j].dx + gradientResult[i*width + j].dy * gradientResult[i*width + j].dy);
+            return ret;
         }
     }
+}
+
+
+////å›¾åƒçš„é«˜æ–¯å¤„ç†ï¼Œè·å–ç»“æœ
+int gaussianFilter2(float* input_data, int width, int height, float* outputResult)
+{
+    int ret = 0;
+    if (!input_data || !outputResult)
+    {
+        ret = -1;
+        printf("è¾“å…¥æˆ–è€…è¾“å‡ºä¸èƒ½ä¸ºç©º");
+        return ret;
+    }
+    gradient* gradientResult = (gradient*)malloc(sizeof(gradient)*width * height);
+    if (!gradientResult)
+    {
+        ret = -2;
+        printf("åˆ†é…å†…å­˜ç©ºé—´å¤±è´¥");
+        return ret;
+    }
+    ret = gaussianFilter(input_data, width, height, gradientResult);
+    if (ret)
+    {
+        return ret;
+    }
+
+    //æ¢¯åº¦è®¡ç®—ç»“æœç»“æ„è¾“å‡º
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            outputResult[i*width * 4 + j * 4 + 0] = gradientResult[i*width + j].dx;
+            outputResult[i*width * 4 + j * 4 + 1] = gradientResult[i*width + j].dy;
+            outputResult[i*width * 4 + j * 4 + 2] = gradientResult[i*width + j].dieLength;
+            outputResult[i*width * 4 + j * 4 + 3] = gradientResult[i*width + j].angle;
+        }
+    }
+    if (gradientResult)
+    {
+        free(gradientResult);
+        gradientResult = NULL;
+    }
+    return ret;
 }
