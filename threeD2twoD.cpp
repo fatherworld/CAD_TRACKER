@@ -175,7 +175,7 @@ static int  gaussianFilter(float* input_data, int width, int height, gradient* g
                 nxtj = j - 1;
             }
 
-            //标志该点在
+            //标志该点在原图的坐标位置
             gradientResult[i*width + j].rows = i;
             gradientResult[i*width + j].cols = j;
 
@@ -263,3 +263,11 @@ int gaussianFilter2(float* input_data, int width, int height, float* outputResul
     }
     return ret;
 }
+
+
+//求梯度的最大相似度值
+// int findBestSimilar(float* source_data, int source_width, int source_height, float* module_data, int module_width, int moudle_height, int offset_x, int offset_y, int step)
+// {
+//     int ret = 0;
+//     if(!source_data || !module_data ||)
+// }

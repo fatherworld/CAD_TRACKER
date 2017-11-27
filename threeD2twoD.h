@@ -46,6 +46,11 @@ extern "C"
     //图像的高斯滤波处理
     int  gaussianFilter2(float* input_data, int width, int height, float* outputResult);
 
+
+    //求最大相似度
+    int findBestSimilar(float* source_data, int source_width, int source_height, float* module_data, int module_width, int module_height,int offset_x,int offset_y,int step);
+
+
 #ifdef __cplusplus
 #if __cplusplus
 }

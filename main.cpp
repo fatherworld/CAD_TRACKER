@@ -43,7 +43,15 @@ void test_picTogray()
     //梯度计算求结果
     gaussianFilter2(output_dataf, input.cols, input.rows, floatResult);
 
+    cv::Mat outputf = cv::Mat(input.rows, input.cols, CV_32FC1);
 
+
+    memcpy(outputf.data, floatResult, input.rows * input.cols);
+
+
+    cv::namedWindow("梯度计算结果图");
+    cv::imshow("梯度计算结果图", outputf);
+    cv::waitKey(50000);
 
 //     //测试梯度计算结果，结果出现了精度问题，未解决
 //     for (int i = 0; i < input.cols * input.rows; i++)
@@ -131,12 +139,34 @@ void test_float()
 
 }
 
+//测试求方阵的行列式
+void test_determinants()
+{
+    MARTIX input_data;
+    input_data.rows = 3;
+    input_data.cols = 3;
+    input_data.martix = (float*)malloc(sizeof(double)*input_data.rows * input_data.cols);
+//   
+//     input_data.martix[0] = 2;
+//     input_data.martix[1] = 4;
+//     input_data.martix[2] = 7;
+//     input_data.martix[3] = 1;
+//     input_data.martix[4] = 3;
+//     input_data.martix[5] = 2;
+//     input_data.martix[6] = 5;
+//     input_data.martix[7] = 0;
+//     input_data.martix[8] = 4;
+
+    float result = getA(input_data, 3);
+    std::cout << "|A| is" << result << std::endl;
+}
+
 
 int main()
 {
 //    test_float();
-    test_picTogray();
-
+//    test_picTogray();
+    test_determinants();
 
    // test_mul_maritx();
     
