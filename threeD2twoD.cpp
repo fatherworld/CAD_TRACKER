@@ -265,9 +265,7 @@ int gaussianFilter2(float* input_data, int width, int height, float* outputResul
 }
 
 
-//求梯度的最大相似度值
-// int findBestSimilar(float* source_data, int source_width, int source_height, float* module_data, int module_width, int moudle_height, int offset_x, int offset_y, int step)
-// {
-//     int ret = 0;
-//     if(!source_data || !module_data ||)
-// }
+
+
+
+

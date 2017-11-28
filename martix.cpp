@@ -1,6 +1,5 @@
 #include "matrix.h"
 
-
 //æÿ’Ûœ‡≥À
 int mul_maritx(MARTIX input_martix_left, MARTIX input_martix_right, MARTIX* output_martix)
 {
