@@ -123,7 +123,6 @@ float determinals_martix(MARTIX input_martix,int n)
             {
                 int tempk = (k >= i ? k + 1 : k); 
                 temp_martix.martix[j*(n-1) + k] = input_martix.martix[(j + 1)*n + tempk];
-                printf("---%f", temp_martix.martix[j*(n-1) + k]);
             }
         }
         float temp = determinals_martix(temp_martix, n - 1);//此时求的是余子式
@@ -156,7 +155,6 @@ int follow_martix(MARTIX input_martix, MARTIX* output_martix)
         printf("输出矩阵不能为空\n");
         return ret;
     }
-
     for (int i = 0; i < input_martix.rows; i++)
     {
         for (int j = 0; j < input_martix.cols; j++)
@@ -168,15 +166,13 @@ int follow_martix(MARTIX input_martix, MARTIX* output_martix)
 
             for (int p = 0; p < input_martix.rows - 1; p++)
             {
-                int tempp = (p >= i ? i + 1 : i);
+                int tempp = (p >= i ? p + 1 : p);
                 for (int k = 0; k < input_martix.cols - 1; k++)
                 {
-                    int tempk = (k >= j ? j + 1 : j);
+                    int tempk = (k >= j ? k + 1 : k);
                     temp_martix.martix[p*(input_martix.cols - 1) + k] = input_martix.martix[tempp*input_martix.cols + tempk];
-               //     printf("---%f", temp_martix.martix[j*(n - 1) + k]);
                 }
             }
-
             //伴随矩阵第i行第j列的值为原矩阵第j行第i列的对应的代数余子式
             float temp = determinals_martix(temp_martix, temp_martix.cols);
             if ((i + j) % 2 == 0)
@@ -187,21 +183,41 @@ int follow_martix(MARTIX input_martix, MARTIX* output_martix)
             {
                 output_martix->martix[j*input_martix.cols + i] = -input_martix.martix[i*input_martix.cols + j] * temp;
             }
+            if (temp_martix.martix)
+            {
+                free(temp_martix.martix);
+                temp_martix.martix = NULL;
+            }
+        }
+    }
+
+    return ret;
+}
+
+
+//数乘矩阵运算
+int num_mul_matrix(MARTIX input_martix, float scale,MARTIX* output_martix)
+{
+    int ret = 0;
+    if (ret < 0)
+    {
+        ret = -1;
+        printf("输入的乘数不能为负");
+        return ret;
+    }
+    for (int i = 0; i < input_martix.rows; i++)
+    {
+        for (int j = 0; j < input_martix.cols; j++)
+        {
+            output_martix->martix[i*output_martix->cols + j]= input_martix.martix[i*input_martix.cols + j] * scale;
         }
     }
     return ret;
 }
 
 
-//数乘矩阵运算
-int num_mul_matrix(MARTIX input_martix, float scale)
-{
-
-}
-
-
 //方阵的逆
-int converse_maritx(MARTIX input_martix, MARTIX* output_martix)
+int converse_martix(MARTIX input_martix, MARTIX* output_martix)
 {
     int ret = 0;
     if (!output_martix)
@@ -219,12 +235,23 @@ int converse_maritx(MARTIX input_martix, MARTIX* output_martix)
     }
     //求该矩阵的行列式
     float determinals = determinals_martix(input_martix, input_martix.cols);
-    //求该矩阵的伴随矩阵
+    //行列式的倒数
+    float converse_determinals = 1 / determinals;
+   
     MARTIX follow_martixs;
+    follow_martixs.cols = input_martix.cols;
+    follow_martixs.rows = input_martix.rows;
+    follow_martixs.martix = (float*)malloc(sizeof(float)*input_martix.cols*input_martix.rows);
     ret = follow_martix(input_martix, &follow_martixs);
     if (ret)
     {
         printf("求伴随矩阵出错\n");
+    }
+    ret = num_mul_matrix(follow_martixs, converse_determinals,output_martix);//最终的结果
+    if (follow_martixs.martix)
+    {
+        free(follow_martixs.martix);
+        follow_martixs.martix = NULL;
     }
     return ret;
 }

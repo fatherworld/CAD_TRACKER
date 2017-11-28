@@ -79,7 +79,6 @@ void test_picTogray()
         free(floatResult);
         floatResult = NULL;
     }
-
 }
 
 
@@ -139,6 +138,41 @@ void test_float()
 
 }
 
+
+//测试求方阵的伴随矩阵
+void test_follow()
+{
+    int ret = 0;
+    MARTIX input_data, output_data;
+    output_data.rows = 3;
+    output_data.cols = 3;
+    output_data.martix= (float*)malloc(sizeof(double)*output_data.rows * output_data.cols);
+
+    input_data.rows = 3;
+    input_data.cols = 3;
+    input_data.martix = (float*)malloc(sizeof(double)*input_data.rows * input_data.cols);
+    input_data.martix[0] = 2;
+    input_data.martix[1] = 4;
+    input_data.martix[2] = 7;
+    input_data.martix[3] = 1;
+    input_data.martix[4] = 3;
+    input_data.martix[5] = 2;
+    input_data.martix[6] = 5;
+    input_data.martix[7] = 0;
+    input_data.martix[8] = 4;
+
+    ret=follow_martix(input_data,&output_data);
+
+    for (int i = 0; i < output_data.rows; i++)
+    {
+        for (int j = 0; j < output_data.cols; j++)
+        {
+            printf("伴随矩阵值为第%d行，第%d列的值为%f",i,j,output_data.martix[i*output_data.cols + j]);
+        }
+    }
+}
+
+
 //测试求方阵的行列式
 void test_determinants()
 {
@@ -146,6 +180,8 @@ void test_determinants()
     input_data.rows = 3;
     input_data.cols = 3;
     input_data.martix = (float*)malloc(sizeof(double)*input_data.rows * input_data.cols);
+
+
 //   
 //     input_data.martix[0] = 2;
 //     input_data.martix[1] = 4;
@@ -157,16 +193,52 @@ void test_determinants()
 //     input_data.martix[7] = 0;
 //     input_data.martix[8] = 4;
 
-    float result = getA(input_data, 3);
-    std::cout << "|A| is" << result << std::endl;
+//    float result = getA(input_data, 3);
+//    std::cout << "|A| is" << result << std::endl;
 }
 
 
+//测试矩阵的逆矩阵
+void test_converse()
+{
+    int ret = 0;
+    MARTIX input_data, output_data;
+    output_data.rows = 3;
+    output_data.cols = 3;
+    output_data.martix = (float*)malloc(sizeof(double)*output_data.rows * output_data.cols);
+
+    input_data.rows = 3;
+    input_data.cols = 3;
+    input_data.martix = (float*)malloc(sizeof(double)*input_data.rows * input_data.cols);
+    input_data.martix[0] = 2;
+    input_data.martix[1] = 4;
+    input_data.martix[2] = 7;
+    input_data.martix[3] = 1;
+    input_data.martix[4] = 3;
+    input_data.martix[5] = 2;
+    input_data.martix[6] = 5;
+    input_data.martix[7] = 0;
+    input_data.martix[8] = 4;
+
+    ret=converse_martix(input_data,&output_data);
+    for (int i = 0; i < output_data.rows; i++)
+    {
+        for (int j = 0; j < output_data.cols; j++)
+        {
+            printf("可逆矩阵值为第%d行，第%d列的值为%f", i, j, output_data.martix[i*output_data.cols + j]);
+        }
+    }
+}
+
 int main()
 {
+
+    test_converse();
 //    test_float();
 //    test_picTogray();
-    test_determinants();
+//   test_follow();
+
+//    test_determinants();
 
    // test_mul_maritx();
     
