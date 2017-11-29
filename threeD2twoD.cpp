@@ -1,4 +1,7 @@
 ﻿#include "threeD2twoD.h"
+#include<iostream>
+using namespace std;
+
 
 //此时的世界坐标系转换的时候只需要将世界坐标Xw和Yw除以Zw就可以了
 
@@ -20,15 +23,18 @@ int three2two(threespace worldCoords, MARTIX InternalRef, MARTIX OutRef, twospac
     if (!ret)
     {
         printf("矩阵相乘出错");
+        goto end;
     }
     ret = mul_maritx(*output_martix, tempWorldmartix, output_martix);
     if (!ret)
     {
         printf("矩阵相乘出错");
+        goto end;
     }
     pixCoords->real_x = output_martix->martix[0];
     pixCoords->real_y = output_martix->martix[1 * output_martix->cols];
 
+end:
     if (!tempWorldmartix.martix)
     {
         free(tempWorldmartix.martix);
@@ -47,8 +53,6 @@ int three2two(threespace worldCoords, MARTIX InternalRef, MARTIX OutRef, twospac
     }
     return ret;
 }
-
-
 
 
 //图像的灰度化
@@ -119,8 +123,8 @@ int grayHist(unsigned char* intput_data, int width, int height, float* output_da
 }
 
 
-//缓存高斯处理结果
-static int  gaussianFilter(float* input_data, int width, int height, gradient* gradientResult)
+//梯度计算结果
+int  gaussianFilter(float* input_data, int width, int height, float* gradientResult)
 {
     int ret = 0;
     if (!input_data || !gradientResult)
@@ -132,18 +136,18 @@ static int  gaussianFilter(float* input_data, int width, int height, gradient* g
 
     MARTIX  Convolve3x;
     
-    //构造一个3*3高斯滤波卷积
+    //构造一个3*3索贝尔卷积
     Convolve3x.cols = 3;
     Convolve3x.rows = 3;
     Convolve3x.martix = (float*)malloc(sizeof(float) * 9);
     Convolve3x.martix[0] = -1.0;
     Convolve3x.martix[1] = 0.0;
     Convolve3x.martix[2] = 1.0;
-    Convolve3x.martix[3] = 0.0;
+    Convolve3x.martix[3] = -2.0;
     Convolve3x.martix[4] = 0.0;
-    Convolve3x.martix[5] = 0.0;
+    Convolve3x.martix[5] = 2.0;
     Convolve3x.martix[6] = 1.0;
-    Convolve3x.martix[7] = 2.0;
+    Convolve3x.martix[7] = 0.0;
     Convolve3x.martix[8] = -1.0;
 
     for (int i = 0; i < height; i++)
@@ -154,6 +158,7 @@ static int  gaussianFilter(float* input_data, int width, int height, gradient* g
             int prej = j - 1;
             int nxti = i + 1;
             int nxtj = j + 1;
+
             if (i == 0 )
             {
                 prei = i + 1;
@@ -175,95 +180,38 @@ static int  gaussianFilter(float* input_data, int width, int height, gradient* g
                 nxtj = j - 1;
             }
 
-            //标志该点在原图的坐标位置
-            gradientResult[i*width + j].rows = i;
-            gradientResult[i*width + j].cols = j;
 
-            //计算dx
-            gradientResult[i*width + j].dx =(Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[1] * input_data[prei*width + j] +
+            gradientResult[i*width*4 + j*4 + 0] =(Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[1] * input_data[prei*width + j] +
                 Convolve3x.martix[2] * input_data[prei*width + nxtj] + Convolve3x.martix[3] * input_data[i*width + prej] + Convolve3x.martix[4] * input_data[i*width + j]
                 + Convolve3x.martix[5] * input_data[i*width + nxtj] + Convolve3x.martix[6] * input_data[nxti*width + prej] + Convolve3x.martix[7] * input_data[nxti*width + j]
                 + Convolve3x.martix[8] * input_data[nxti*width + nxtj]);
-            
-// 
-//             float temp2 = Convolve3x.martix[3] * input_data[prei*width + j];
-//             printf("dx result2 is temp2 -> %f", temp2);
-// 
-//             float temp1 = Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[3] * input_data[prei*width + j];
-//             printf("dx result is temp1 -> %f", temp1);
-
-
-
-            float temp = (Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[3] * input_data[prei*width + j] +
-                Convolve3x.martix[6] * input_data[prei*width + nxtj] + Convolve3x.martix[1] * input_data[i*width + prej] + Convolve3x.martix[4] * input_data[i*width + j]
-                + Convolve3x.martix[7] * input_data[i*width + nxtj] + Convolve3x.martix[2] * input_data[nxti*width + prej] + Convolve3x.martix[5] * input_data[nxti*width + j]
-                + Convolve3x.martix[8] * input_data[nxti*width + nxtj]);
-        //    printf("dx result is temp -> %f", temp);
-
-
-
 
             //计算dy
-            gradientResult[i*width + j].dy = (float)(Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[3] * input_data[prei*width + j] +
+            gradientResult[i*width * 4 + j * 4 + 1] = (float)(Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[3] * input_data[prei*width + j] +
                 Convolve3x.martix[6] * input_data[prei*width + nxtj] + Convolve3x.martix[1] * input_data[i*width + prej] + Convolve3x.martix[4] * input_data[i*width + j]
                 + Convolve3x.martix[7] * input_data[i*width + nxtj] + Convolve3x.martix[2] * input_data[nxti*width + prej] + Convolve3x.martix[5] * input_data[nxti*width + j]
                 + Convolve3x.martix[8] * input_data[nxti*width + nxtj]);
 
+            cout << gradientResult[i*width * 4 + j * 4 + 1] << endl;
 
             //计算正切角
-            gradientResult[i*width + j].angle =(float)(atan2(gradientResult[i*width + j].dx, gradientResult[i*width + j].dy));
+            gradientResult[i*width * 4 + j * 4 + 2] =(float)(atan2(gradientResult[i*width * 4 + j * 4 + 0], gradientResult[i*width * 4 + j * 4 + 1]));
 
 
             //计算模长
-            gradientResult[i*width + j].dieLength = (float)sqrt(gradientResult[i*width + j].dx * gradientResult[i*width + j].dx + gradientResult[i*width + j].dy * gradientResult[i*width + j].dy);
+            gradientResult[i*width * 4 + j * 4 + 3] = (float)sqrt(gradientResult[i*width * 4 + j * 4 + 0] * gradientResult[i*width * 4 + j * 4 + 0] + gradientResult[i*width * 4 + j * 4 + 1] * gradientResult[i*width * 4 + j * 4 + 1]);
+           
+           cout << gradientResult[i*width * 4 + j * 4 + 3] << endl;
             return ret;
         }
     }
+
+    if (Convolve3x.martix)
+    {
+        free(Convolve3x.martix);
+        Convolve3x.martix = NULL;
+    }
 }
-
-
-////图像的高斯处理，获取结果
-int gaussianFilter2(float* input_data, int width, int height, float* outputResult)
-{
-    int ret = 0;
-    if (!input_data || !outputResult)
-    {
-        ret = -1;
-        printf("输入或者输出不能为空");
-        return ret;
-    }
-    gradient* gradientResult = (gradient*)malloc(sizeof(gradient)*width * height);
-    if (!gradientResult)
-    {
-        ret = -2;
-        printf("分配内存空间失败");
-        return ret;
-    }
-    ret = gaussianFilter(input_data, width, height, gradientResult);
-    if (ret)
-    {
-        return ret;
-    }
-
-    //梯度计算结果结构输出
-    for (int i = 0; i < height; i++)
-    {
-        for (int j = 0; j < width; j++)
-        {
-            outputResult[i*width * 4 + j * 4 + 0] = gradientResult[i*width + j].dx;
-            outputResult[i*width * 4 + j * 4 + 1] = gradientResult[i*width + j].dy;
-            outputResult[i*width * 4 + j * 4 + 2] = gradientResult[i*width + j].dieLength;
-            outputResult[i*width * 4 + j * 4 + 3] = gradientResult[i*width + j].angle;
-        }
-    }
-    if (gradientResult)
-    {
-        free(gradientResult);
-        gradientResult = NULL;
-    }
-    return ret;
-}
-
 
 
 
