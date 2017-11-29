@@ -17,11 +17,11 @@ static float similarity(float*source_data, float*module_data,int module_width,in
             float source_dx = source_data[i*module_width * 4 + 4 * j + 0];
             float source_dy = source_data[i*module_width * 4 + 4 * j + 1];
             float module_dx = module_data[i*module_width * 4 + 4 * j + 0];
-            float module_dx = module_data[i*module_width * 4 + 4 * j + 0];
-//            similar+=
+            float module_dy = module_data[i*module_width * 4 + 4 * j + 1];
+            similar += sqrt(source_dx*module_dx + module_dy*source_dy);
         }
     }
-
+    return similar / (module_width*module_height);
 }
 
 
@@ -53,6 +53,7 @@ static int findMax(Similarity* similaritys, Similarity* max_similarity,int simil
             break;
         }
     }
+    return ret;
 }
 
 
@@ -61,33 +62,47 @@ int findMaxSimilar(float* source_data, int source_width, int source_height,
     float* module_data, int module_width, int module_height, int offset_x,
     int offset_y, int step, Similarity* max_similarity)
 {
+    Similarity* similarys = (Similarity*)(malloc(sizeof(Similarity)*module_height * module_width / 4));
     int ret = 0;
     if (!source_data || !module_data)
     {
         ret = -1;
         printf("输入的原图像或者模板图像不能为空");
-        return ret;
+        goto end;
     }
 
     //缓存每一个相似度
-    Similarity* similarys = (Similarity*)(malloc(sizeof(Similarity)*module_height * module_width / 4));
+   
 
 
     //遍历寻找所有的匹配值
-    for (int j = 0; j < module_height / 2; j++)
+    for (int j = 0; j < module_height / step; j++)
     {
         //根据offset_x 和offset_y寻找每一行原始图片的起始搜索匹配位置
-        float* source_begin_line = source_data + source_width * 4 * (offset_y - 20 + j * 2) + (offset_x - 20) * 4;
-        for (int i = 0; i < module_width / 2; i++)
+        float* source_begin_line = source_data + source_width * 4 * (offset_y - 20 + j * step) + (offset_x - 20) * 4;
+        for (int i = 0; i < module_width / step; i++)
         {
-            similarys[j*module_width / 2 + i].offset_x = (offset_x - 20 + 2 * i) * 4;
-            similarys[j*module_width / 2 + i].offset_y = source_width * 4 * (offset_y - 20 + j * 2);
-            source_data = source_begin_line + 2 * i;
+            similarys[j*module_width / step + i].offset_x = (offset_x - 20 + step * i) * 4;
+            similarys[j*module_width / step + i].offset_y = source_width * 4 * (offset_y - 20 + j * step);
+            source_data = source_begin_line + step * i;
 
             similarys[j*module_width / 2 + i].similary = similarity(source_data, module_data, module_width,module_height);
         }
     }
-
-
-    //
+    
+    //求最大相似度的点
+    ret = findMax(similarys, max_similarity, module_height * module_width / 4);
+    if (ret)
+    {
+        ret = -2;
+        printf("计算最大相似度点出错");
+        goto end;
+    }
+end:
+    if (!similarys)
+    {
+        free(similarys);
+        similarys = NULL;
+    }
+    return ret;
 }
