@@ -181,10 +181,12 @@ int  gaussianFilter(float* input_data, int width, int height, float* gradientRes
             }
 
 
+            //计算dx
             gradientResult[i*width*4 + j*4 + 0] =(Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[1] * input_data[prei*width + j] +
                 Convolve3x.martix[2] * input_data[prei*width + nxtj] + Convolve3x.martix[3] * input_data[i*width + prej] + Convolve3x.martix[4] * input_data[i*width + j]
                 + Convolve3x.martix[5] * input_data[i*width + nxtj] + Convolve3x.martix[6] * input_data[nxti*width + prej] + Convolve3x.martix[7] * input_data[nxti*width + j]
                 + Convolve3x.martix[8] * input_data[nxti*width + nxtj]);
+
 
             //计算dy
             gradientResult[i*width * 4 + j * 4 + 1] = (float)(Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[3] * input_data[prei*width + j] +
@@ -192,7 +194,6 @@ int  gaussianFilter(float* input_data, int width, int height, float* gradientRes
                 + Convolve3x.martix[7] * input_data[i*width + nxtj] + Convolve3x.martix[2] * input_data[nxti*width + prej] + Convolve3x.martix[5] * input_data[nxti*width + j]
                 + Convolve3x.martix[8] * input_data[nxti*width + nxtj]);
 
-            cout << gradientResult[i*width * 4 + j * 4 + 1] << endl;
 
             //计算正切角
             gradientResult[i*width * 4 + j * 4 + 2] =(float)(atan2(gradientResult[i*width * 4 + j * 4 + 0], gradientResult[i*width * 4 + j * 4 + 1]));
@@ -201,7 +202,13 @@ int  gaussianFilter(float* input_data, int width, int height, float* gradientRes
             //计算模长
             gradientResult[i*width * 4 + j * 4 + 3] = (float)sqrt(gradientResult[i*width * 4 + j * 4 + 0] * gradientResult[i*width * 4 + j * 4 + 0] + gradientResult[i*width * 4 + j * 4 + 1] * gradientResult[i*width * 4 + j * 4 + 1]);
            
-           cout << gradientResult[i*width * 4 + j * 4 + 3] << endl;
+            if (gradientResult[i*width * 4 + j * 4 + 3] < 0.15)
+            {
+                gradientResult[i*width * 4 + j * 4 + 0] = 0;
+                gradientResult[i*width * 4 + j * 4 + 1] = 0;
+                gradientResult[i*width * 4 + j * 4 + 2] = 0;
+                gradientResult[i*width * 4 + j * 4 + 3] = 0;
+            }
             return ret;
         }
     }
