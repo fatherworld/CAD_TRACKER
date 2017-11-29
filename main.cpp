@@ -1,6 +1,7 @@
 #include "matrix.h"
 #include <iostream>
 #include "threeD2twoD.h"
+#include "matrix.h"
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/calib3d/calib3d.hpp"
@@ -41,7 +42,7 @@ void test_picTogray()
   
 
     //梯度计算求结果
-    gaussianFilter2(output_dataf, input.cols, input.rows, floatResult);
+    gaussianFilter(output_dataf, input.cols, input.rows, floatResult);
 
     cv::Mat outputf = cv::Mat(input.rows, input.cols, CV_32FC1);
 
@@ -140,7 +141,7 @@ void test_float()
 
 
 //测试求方阵的伴随矩阵
-void test_follow()
+int test_follow()
 {
     int ret = 0;
     MARTIX input_data, output_data;
@@ -170,6 +171,18 @@ void test_follow()
             printf("伴随矩阵值为第%d行，第%d列的值为%f",i,j,output_data.martix[i*output_data.cols + j]);
         }
     }
+
+    if (!output_data.martix)
+    {
+        free(output_data.martix);
+        output_data.martix = NULL;
+    }
+    if (!input_data.martix)
+    {
+        free(input_data.martix);
+        input_data.martix = NULL;
+    }
+    return ret;
 }
 
 
@@ -230,10 +243,18 @@ void test_converse()
     }
 }
 
+void test_similarity()
+{
+//     int ret = 0;
+//     ret = findMaxSimilar(float* source_data, int source_width, int source_height,
+//         float* module_data, int module_width, int module_height, int offset_x,
+//         int offset_y, int step, Similarity* max_similarity);
+}
+
 int main()
 {
-
-    test_converse();
+    test_picTogray();
+//    test_converse();
 //    test_float();
 //    test_picTogray();
 //   test_follow();

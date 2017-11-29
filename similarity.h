@@ -1,6 +1,7 @@
 #pragma once
 #include<stdio.h>
 #include<stdlib.h>
+#include<math.h>
 #define MAX_SIMILARITY -999999.0
 #ifdef __cplusplus
 #if __cplusplus
