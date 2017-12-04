@@ -29,7 +29,7 @@ static float similarity(float*source_data, float*module_data,int module_width,in
 static int findMax(Similarity* similaritys, Similarity* max_similarity,int similaritys_size)
 {
     int ret = 0;
-    if (!similarity || !max_similarity)
+    if (!similaritys || !max_similarity)
     {
         ret = -1;
         printf("输入或者输出不能为空");
@@ -71,16 +71,12 @@ int findMaxSimilar(float* source_data, int source_width, int source_height,
         goto end;
     }
 
-    //缓存每一个相似度
-   
-
-
     //遍历寻找所有的匹配值
-    for (int j = 0; j < module_height / step; j++)
+    for (int j = 0; j < 20; j++)
     {
         //根据offset_x 和offset_y寻找每一行原始图片的起始搜索匹配位置
         float* source_begin_line = source_data + source_width * 4 * (offset_y - 20 + j * step) + (offset_x - 20) * 4;
-        for (int i = 0; i < module_width / step; i++)
+        for (int i = 0; i < 20; i++)
         {
             similarys[j*module_width / step + i].offset_x = (offset_x - 20 + step * i) * 4;
             similarys[j*module_width / step + i].offset_y = source_width * 4 * (offset_y - 20 + j * step);
@@ -98,6 +94,7 @@ int findMaxSimilar(float* source_data, int source_width, int source_height,
         printf("计算最大相似度点出错");
         goto end;
     }
+
 end:
     if (!similarys)
     {

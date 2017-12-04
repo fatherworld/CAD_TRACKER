@@ -146,9 +146,9 @@ int  gaussianFilter(float* input_data, int width, int height, float* gradientRes
     Convolve3x.martix[3] = -2.0;
     Convolve3x.martix[4] = 0.0;
     Convolve3x.martix[5] = 2.0;
-    Convolve3x.martix[6] = 1.0;
+    Convolve3x.martix[6] = -1.0;
     Convolve3x.martix[7] = 0.0;
-    Convolve3x.martix[8] = -1.0;
+    Convolve3x.martix[8] = 1.0;
 
     for (int i = 0; i < height; i++)
     {
@@ -182,9 +182,6 @@ int  gaussianFilter(float* input_data, int width, int height, float* gradientRes
 
 
             //计算dx
-
-
-
             gradientResult[i*width*4 + j*4 + 0] =(Convolve3x.martix[0] * input_data[prei*width + prej] + Convolve3x.martix[1] * input_data[prei*width + j] +
                 Convolve3x.martix[2] * input_data[prei*width + nxtj] + Convolve3x.martix[3] * input_data[i*width + prej] + Convolve3x.martix[4] * input_data[i*width + j]
                 + Convolve3x.martix[5] * input_data[i*width + nxtj] + Convolve3x.martix[6] * input_data[nxti*width + prej] + Convolve3x.martix[7] * input_data[nxti*width + j]
@@ -197,7 +194,6 @@ int  gaussianFilter(float* input_data, int width, int height, float* gradientRes
                 + Convolve3x.martix[7] * input_data[i*width + nxtj] + Convolve3x.martix[2] * input_data[nxti*width + prej] + Convolve3x.martix[5] * input_data[nxti*width + j]
                 + Convolve3x.martix[8] * input_data[nxti*width + nxtj]);
 
-            cout << gradientResult[i*width * 4 + j * 4 + 1] << endl;
 
             //计算正切角
             gradientResult[i*width * 4 + j * 4 + 2] =(float)(atan2(gradientResult[i*width * 4 + j * 4 + 0], gradientResult[i*width * 4 + j * 4 + 1]));
@@ -206,7 +202,6 @@ int  gaussianFilter(float* input_data, int width, int height, float* gradientRes
             //计算模长
             gradientResult[i*width * 4 + j * 4 + 3] = (float)sqrt(gradientResult[i*width * 4 + j * 4 + 0] * gradientResult[i*width * 4 + j * 4 + 0] + gradientResult[i*width * 4 + j * 4 + 1] * gradientResult[i*width * 4 + j * 4 + 1]);
            
-		   
             if (gradientResult[i*width * 4 + j * 4 + 3] < 0.15)
             {
                 gradientResult[i*width * 4 + j * 4 + 0] = 0;
@@ -226,53 +221,6 @@ int  gaussianFilter(float* input_data, int width, int height, float* gradientRes
 }
 
 
-
-
-
-
-//图像的高斯处理，获取结果
-// int gaussianFilter2(float* input_data, int width, int height, float* outputResult)
-// {
-//     int ret = 0;
-//     if (!input_data || !outputResult)
-//     {
-//         ret = -1;
-//         printf("输入或者输出不能为空");
-//         return ret;
-//     }
-//     gradient* gradientResult = (gradient*)malloc(sizeof(gradient)*width * height);
-//     if (!gradientResult)
-//     {
-//         ret = -2;
-//         printf("分配内存空间失败");
-//         return ret;
-//     }
-//     ret = gaussianFilter(input_data, width, height, gradientResult);
-//     if (ret)
-//     {
-//         printf("高斯处理失败");
-//         goto end;
-//     }
-// 
-//     //梯度计算结果结构输出
-//     for (int i = 0; i < height; i++)
-//     {
-//         for (int j = 0; j < width; j++)
-//         {
-//             outputResult[i*width * 4 + j * 4 + 0] = gradientResult[i*width + j].dx;
-//             outputResult[i*width * 4 + j * 4 + 1] = gradientResult[i*width + j].dy;
-//             outputResult[i*width * 4 + j * 4 + 2] = gradientResult[i*width + j].dieLength;
-//             outputResult[i*width * 4 + j * 4 + 3] = gradientResult[i*width + j].angle;
-//         }
-//     }
-// end:
-//     if (gradientResult)
-//     {
-//         free(gradientResult);
-//         gradientResult = NULL;
-//     }
-//     return ret;
-// }
 
 
 

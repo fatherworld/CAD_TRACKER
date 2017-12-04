@@ -18,7 +18,7 @@ extern "C"
         int cols;  //在归一化的图像中的所在列
     } gradient;
 
-    //三维世界坐标点
+    //三维坐标点
     typedef struct _3Dimension
     {
         float real_x;

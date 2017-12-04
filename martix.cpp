@@ -254,3 +254,53 @@ int converse_martix(MARTIX input_martix, MARTIX* output_martix)
     }
     return ret;
 }
+
+
+//矩阵的转置
+int translate_martix(MARTIX input_martix, MARTIX* output_martix)
+{
+    int ret = 0;
+    if (!output_martix)
+    {
+        ret = -1;
+        printf("输出矩阵不能为空");
+        return ret;
+    }
+    output_martix->cols = input_martix.rows;
+    output_martix->rows = input_martix.cols;
+
+    for (int i = 0; i < output_martix->rows; i++)
+    {
+        for (int j = 0; j < output_martix->cols; j++)
+        {
+            output_martix->martix[i*output_martix->cols + j] = input_martix.martix[j*input_martix.cols + i];
+        }
+    }
+    return ret;
+}
+
+//相同行列矩阵的赋值
+int assign_martix(MARTIX input_martix, MARTIX* output_martix)
+{
+    int ret = 0;
+    if (!output_martix)
+    {
+        ret = -1;
+        printf("输出矩阵不能为空");
+        return ret;
+    }
+    if (output_martix->rows != input_martix.rows || output_martix->cols != input_martix.cols)
+    {
+        ret = -2;
+        printf("输入输出矩阵不同型");
+        return ret;
+    }
+    for (int i = 0; i < input_martix.rows; i++)
+    {
+        for (int j = 0; j < input_martix.cols; j++)
+        {
+            output_martix->martix[i*input_martix.cols + j] = input_martix.martix[i*input_martix.cols + j];
+        }
+    }
+    return ret;
+}

@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <vector>
 //矩阵的数据结构
 #ifdef __cplusplus
 #if __cplusplus
@@ -18,6 +17,7 @@ typedef struct _MARTIX
     int cols;   //矩阵列数
     float* martix;
 } MARTIX;
+
 
 
 /*
@@ -86,8 +86,25 @@ pragma two:矩阵缩放系数
 pragma three:结果矩阵
 THE FUNCTION IS JUST FOR TWO MARTIX
 */
-int num_mul_matrix(MARTIX input_martix, float scale);
+int num_mul_matrix(MARTIX input_martix, float scale,MARTIX* output_martix);
 
+
+
+/*
+矩阵的转置:
+pragma one:输入矩阵
+pragma two:输出矩阵
+THE FUNCTION IS JUST FOR TWO MARTIX
+*/
+int translate_martix(MARTIX input_martix, MARTIX* output_martix);
+
+
+/*
+矩阵的赋值：
+pragma one:输入矩阵
+pragma two:输出矩阵
+*/
+int assign_martix(MARTIX input_martix, MARTIX* output_martix);
 
 #ifdef __cplusplus
 #if  __cplusplus
