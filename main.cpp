@@ -8,6 +8,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <iostream>
 #include "tracer.h"
+#include "ReadDataFile.h"
 using namespace std;
 
 /*
@@ -24,136 +25,211 @@ pragma eight:后一帧的姿态
 int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gesture,
     threespace *ModulePoint, float* randomError, int gesture_nnum, twospace* deviation, MARTIX* nxtGesture);
 */
+
+
+
 void test_leastSq()
 {
-//    char* test = (char*)malloc(1024 * 1024 * 1024*2);
 
+    
+  /* -415.69220f, 0.0f, 320.0f, 0.0f,
+        0.0f, -415.69220f, 240.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f
+   */
+    int ret = 0;
     //内参矩阵
     MARTIX internalRef;
     internalRef.cols = 3;
     internalRef.rows = 2;
     internalRef.martix = (float*)(malloc(sizeof(float) * 2 * 3));
-    internalRef.martix[0] = 10; internalRef.martix[1] = 0; internalRef.martix[2] = 120;
-    internalRef.martix[3] = 0; internalRef.martix[4] = 5; internalRef.martix[5] = 60;
-
-    //相机坐标系采样点
-    threespace* CameraSamplePoint = (threespace*)malloc(sizeof(threespace) * 12);
-    CameraSamplePoint[0].real_x = 3; CameraSamplePoint[0].real_y = 1; CameraSamplePoint[0].real_z = 2;
-    CameraSamplePoint[1].real_x = 3; CameraSamplePoint[1].real_y = 2; CameraSamplePoint[1].real_z = 2;
-    CameraSamplePoint[2].real_x = 3; CameraSamplePoint[2].real_y = 3; CameraSamplePoint[2].real_z = 2;
-
-    CameraSamplePoint[3].real_x = 3; CameraSamplePoint[3].real_y = 3; CameraSamplePoint[3].real_z = 1;
-    CameraSamplePoint[4].real_x = 3; CameraSamplePoint[4].real_y = 3; CameraSamplePoint[4].real_z = 2;
-    CameraSamplePoint[5].real_x = 3; CameraSamplePoint[5].real_y = 3; CameraSamplePoint[5].real_z = 3;
-
-    CameraSamplePoint[6].real_x = 3; CameraSamplePoint[6].real_y = 2; CameraSamplePoint[6].real_z = 3;
-    CameraSamplePoint[7].real_x = 3; CameraSamplePoint[7].real_y = 1; CameraSamplePoint[7].real_z = 3;
-    CameraSamplePoint[8].real_x = 3; CameraSamplePoint[8].real_y = 0; CameraSamplePoint[8].real_z = 3;
-
-    CameraSamplePoint[9].real_x = 3; CameraSamplePoint[9].real_y = 0; CameraSamplePoint[9].real_z = 2;
-    CameraSamplePoint[10].real_x = 3; CameraSamplePoint[10].real_y = 0; CameraSamplePoint[10].real_z = 1;
-    CameraSamplePoint[11].real_x = 3; CameraSamplePoint[11].real_y = 0; CameraSamplePoint[11].real_z = 2;
-
-    //前一帧的姿态矩阵
-    MARTIX pre_gesture;
-    pre_gesture.cols = pre_gesture.rows = 4;
-    pre_gesture.martix = (float*)malloc(sizeof(float)*pow(4, 2));
-    memset(pre_gesture.martix, 0, sizeof(float)*pow(4, 2));
-    for (int i = 0; i < 16; i++)
-    {
-        if (i < 4)
-        {
-            pre_gesture.martix[i] = 4 - i;
-        }
-        else
-        {
-            pre_gesture.martix[i] = i + 1;
-        }
-    }
-
-    //模板坐标
-    threespace* ModulePoint = (threespace*)malloc(sizeof(threespace) * 12);
-    ModulePoint[0].real_x = 1; ModulePoint[0].real_y = 2; ModulePoint[0].real_z = 0;
-    ModulePoint[1].real_x = 2; ModulePoint[1].real_y = 2; ModulePoint[1].real_z = 0;
-    ModulePoint[2].real_x = 3; ModulePoint[2].real_y = 2; ModulePoint[2].real_z = 0;
-
-    ModulePoint[3].real_x = 1; ModulePoint[3].real_y = 1; ModulePoint[3].real_z = 0;
-    ModulePoint[4].real_x = 3; ModulePoint[4].real_y = 3; ModulePoint[4].real_z = 0;
-    ModulePoint[5].real_x = 3; ModulePoint[5].real_y = 2; ModulePoint[5].real_z = 1;
-
-    ModulePoint[6].real_x = 1; ModulePoint[6].real_y = 2; ModulePoint[6].real_z = 3;
-    ModulePoint[7].real_x = 1; ModulePoint[7].real_y = 2; ModulePoint[7].real_z = 2;
-    ModulePoint[8].real_x = 2; ModulePoint[8].real_y = 1; ModulePoint[8].real_z = 1;
-
-    ModulePoint[9].real_x = 1; ModulePoint[9].real_y = 1;  ModulePoint[9].real_z = 1;
-    ModulePoint[10].real_x = 2; ModulePoint[10].real_y = 2; ModulePoint[10].real_z = 2;
-    ModulePoint[11].real_x = 3;ModulePoint[11].real_y = 3; ModulePoint[11].real_z = 3;
+    internalRef.martix[0] = -415.69220f; internalRef.martix[1] = 0.0f; internalRef.martix[2] = 320.0f;
+    internalRef.martix[3] = 0.0f;  internalRef.martix[4] = -415.69220f; internalRef.martix[5] = 240.0f;
 
 
-    //采样点与搜索点的相对误差
-    float* randomError = (float*)malloc(sizeof(float) * 12);
-    randomError[0] = 0.01; randomError[1] = 0.02; randomError[2] = 0.04; randomError[3] = 0.05; randomError[4] = 0.03;
-    randomError[5] = 0.04; randomError[6] = 0.05; randomError[7] = 0.03; randomError[8] = 0.05; randomError[9] = 0.07;
-    randomError[10] = 0.02; randomError[11] = 0.08;
+    //相机外参
+    MARTIX outerRef;
+    outerRef.cols = outerRef.rows = 4;
+    outerRef.martix = (float*)malloc(sizeof(float)*pow(4, 2));
+    float Angle[3] = { -90.0f, 45.0f, 0.0f };
+    float Transform[3] = { 0.0f, 0.0f, 40.0f };
+    RoAndTranToRT(Angle[0], Angle[1], Angle[2],
+        Transform[0], Transform[1], Transform[2], outerRef.martix);
+    
+    //获取文件中的给矩阵使用的数据信息
+    ForMatrix* OutForMartix = (ForMatrix*)malloc(sizeof(ForMatrix) * 74);
+    ReadTestData(OutForMartix);
+
+    //世界坐标系下采样点矩阵
+    MARTIX ModulePointMartix;
+    ModulePointMartix.cols = 74;
+    ModulePointMartix.rows = 4;
+    ModulePointMartix.martix = (float*)malloc(sizeof(float)*ModulePointMartix.rows*ModulePointMartix.cols);
+    
+
+    //相机坐标系采样点矩阵
+    MARTIX CameraSamplePoint;
+    CameraSamplePoint.cols = 74;
+    CameraSamplePoint.rows = 4;
+    CameraSamplePoint.martix = (float*)malloc(sizeof(float)*ModulePointMartix.rows*ModulePointMartix.cols);
+    //世界坐标乘以RT矩阵获取相机坐标矩阵
+    ret = mul_maritx(ModulePointMartix, ModulePointMartix, &CameraSamplePoint);
 
     //法向量：
-    twospace* deviation = (twospace*)malloc(sizeof(twospace) * 12);
-    deviation[0].real_x = deviation[0].real_y = 1;
-    deviation[1].real_x = 1; deviation[1].real_y = 2;
-    deviation[2].real_x = deviation[2].real_y = 2;
-    deviation[3].real_x = 2; deviation[3].real_y = 3;
-    deviation[4].real_x = 1; deviation[4].real_y = 3;
-    deviation[5].real_x = 2; deviation[5].real_y = 2;
-    deviation[6].real_x = 3; deviation[6].real_y = 3;
-    deviation[7].real_x = 0; deviation[7].real_y = 1;
-    deviation[8].real_x = 0; deviation[8].real_y = 1;
-    deviation[9].real_x =  deviation[9].real_y  = 1;
-    deviation[10].real_x = deviation[10].real_y = 2;
-    deviation[11].real_x = deviation[11].real_y = 3;
+    MARTIX deviation;
+    deviation.cols = 74;
+    deviation.rows = 2;
+    deviation.martix = (float*)malloc(sizeof(float)*deviation.rows*deviation.cols);
+    
+    //采样点与搜索点的相对误差矩阵
+    MARTIX randomError;
+    randomError.rows = 74;
+    randomError.cols = 1;
+    randomError.martix = (float*)malloc(sizeof(float)*randomError.rows*randomError.cols);
+
+//    twospace* deviation = (twospace*)malloc(sizeof(twospace) * 1);
+//    deviation[0].real_x = deviation[0].real_y = 1;
+   
+
+
+    for (int i = 0; i < 74; i++)
+    {
+        //获取CAD模型可见点集
+        ModulePointMartix.martix[0 * 74 + i] = OutForMartix[i].d3Point.v[0];
+        ModulePointMartix.martix[1 * 74 + i] = OutForMartix[i].d3Point.v[1];
+        ModulePointMartix.martix[2 * 74 + i] = OutForMartix[i].d3Point.v[2];
+        ModulePointMartix.martix[3 * 74 + i] = 1;
+        //获取法向量的集合
+        deviation.martix[0 * 74 + i] = OutForMartix[i].d2Normal.v[0];
+        deviation.martix[1 * 74 + i] = OutForMartix[i].d2Normal.v[1];
+        //获取可见点和搜索点的误差集合
+        float randx = OutForMartix[i].d2FindPoint.v[0] - OutForMartix[i].d2Point.v[0];
+        float randy = OutForMartix[i].d2FindPoint.v[1] - OutForMartix[i].d2Point.v[1];
+        randomError.martix[i] = sqrt(pow(randx, 2) + pow(randy, 2));
+    }
+
 
     //下一帧的姿态信息
     MARTIX nxtGesture;
     nxtGesture.cols = nxtGesture.rows = 4;
     nxtGesture.martix = (float*)malloc(sizeof(float)*pow(nxtGesture.cols, 2));
-    int ret = leastSquares(internalRef, CameraSamplePoint, pre_gesture,
-        ModulePoint, randomError, 12, deviation, &nxtGesture);
+
+    //leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gesture,
+    //threespace *ModulePoint, float* randomError, int gesture_nnum, twospace* deviation, MARTIX* nxtGesture)
+
+    ret = leastSquares(internalRef, CameraSamplePoint, outerRef,
+        ModulePointMartix, randomError, 74, deviation, &nxtGesture);
+
+    printf("前一帧的位姿信息为:\n");
+    for (int i = 0; i <  outerRef.rows; i++)
+    {
+        for (int j = 0; j <  outerRef.cols; j++)
+        {
+            printf("%d行-%d列的值为%f", i + 1, j + 1, outerRef.martix[i* outerRef.cols + j]);
+        }
+        printf("\n");
+    }
+
+    printf("后一帧的位姿信息为:\n");
+    for (int i = 0; i < nxtGesture.rows; i++)
+    {
+        for (int j = 0; j < nxtGesture.cols; j++)
+        {
+            printf("%d行-%d列的值为%f", i + 1, j + 1, nxtGesture.martix[i*nxtGesture.cols + j]);
+        }
+        printf("\n");
+    }
 
     if (internalRef.martix)
     {
         free(internalRef.martix);
         internalRef.martix = NULL;
     }
-    if (CameraSamplePoint)
+    if (outerRef.martix)
     {
-        free(CameraSamplePoint);
-        CameraSamplePoint = NULL;
+        free(outerRef.martix);
+        outerRef.martix = NULL;
     }
-    if (pre_gesture.martix)
+    if (OutForMartix)
     {
-        free(pre_gesture.martix);
-        pre_gesture.martix = NULL;
+        free(OutForMartix);
+        OutForMartix = NULL;
     }
     
-    if (ModulePoint)
+    if (ModulePointMartix.martix)
     {
-        free(ModulePoint);
-        ModulePoint = NULL;
+        free(ModulePointMartix.martix);
+        ModulePointMartix.martix = NULL;
     }
-    if (randomError)
+    if (CameraSamplePoint.martix)
     {
-        free(randomError);
-        randomError = NULL;
+        free(CameraSamplePoint.martix);
+        CameraSamplePoint.martix = NULL;
     }
-    if (deviation)
+    if (deviation.martix)
     {
-        free(deviation);
-        deviation = NULL;
+        free(deviation.martix);
+        deviation.martix = NULL;
+    }
+    if (randomError.martix)
+    {
+        free(randomError.martix);
+        randomError.martix = NULL;
     }
     if (nxtGesture.martix)
     {
         free(nxtGesture.martix);
         nxtGesture.martix = NULL;
     }
+    system("pause");
+ }
+
+
+void test_operateMartix()
+{
+//     MARTIX trs_ni;
+//     trs_ni.cols = 2;
+//     trs_ni.martix = (float*)malloc(sizeof(float)*trs_ni.cols*trs_ni.rows);
+//     trs_ni.martix[0] = trs_ni.martix[1] = 1;
+// 
+//     MARTIX JK;
+//     JK.cols = JK.rows = 2;
+//     JK.martix = (float*)malloc(sizeof(float)*JK.rows*JK.cols);
+//     JK.martix[0] = 10; JK.martix[1] = 0;
+//     JK.martix[2] = 0; JK.martix[3] = 5;
+// 
+//     MARTIX JP;
+//     JP.cols = 4; JP.rows = 2;
+//     JP.martix[0] = 1 / 30; JP.martix[1] = 0; JP.martix[2] = -2 / 90; JP.martix[3] = 0;
+//     JP.martix[4] = 0; JP.martix[5] = 1 / 30; JP.martix[6] = -1 / 36; JP.martix[7] = 0;
+// 
+//     MARTIX Et;
+//     Et.cols = Et.rows = 4;
+//     Et.martix = (float*)malloc(sizeof(float)*Et.rows*Et.cols);
+//     int p = 0;
+//     for (int i = 0; i < Et.rows; i++)
+//     {
+//         for (int j = 0; j < Et.cols; j++)
+//         {
+//             Et.martix[i*Et.cols + j] = p;
+//             p++;
+//         }
+//     }
+//     
+//     MARTIX P;
+//     P.rows = 4;
+//     P.cols = 1;
+//     P.martix = (float*)malloc(sizeof(float)*(P.rows * P.cols));
+//     P.martix[0] = 10; P.martix[1] = 20; P.martix[2] = 20; P.martix[3] = 1;
+// 
+//     MARTIX Ni;
+//     Ni.rows = 1;
+//     Ni.cols = 2;
+//     Ni.martix = (float*)malloc(sizeof(float)*Ni.rows*Ni.cols);
+//     Ni.martix[0] = 1; Ni.martix[1] = 1;
+// 
+// 
+
+
 }
 
 
@@ -508,6 +584,7 @@ void hanoi(int n, int firstA, int secondB, int thirdC)
 int main()
 {
 
+ 
     test_leastSq();
  //   test_converse();
  //    test_assignMartix();
