@@ -67,16 +67,23 @@ static int gesture_change(MARTIX six_freedom,MARTIX* lds,MARTIX* gestureChangeM)
         memset(tempMartix[i].martix, 0, sizeof(float)*pow(4, 2));
     }
     
-    
+    //计算泰勒展开的第二项
     for (int j = 0; j < 6; j++)
     {
         num_mul_matrix(lds[j], six_freedom.martix[j], &lds[j]);
         add_maritx(tempMartix[0], lds[j], &tempMartix[0]);
     }
 
+    MARTIX ysTemp;
+    ysTemp.cols = 4;
+    ysTemp.rows = 4;
+    ysTemp.martix = (float*)malloc(sizeof(float)*pow(4, 2));
+    memset(ysTemp.martix, 0, sizeof(float)*pow(4, 2));
 
-    mul_maritx(tempMartix[0], tempMartix[0], &tempMartix[1]);
-    num_mul_matrix(tempMartix[1],1/2, &tempMartix[1]);
+    mul_maritx(tempMartix[0], tempMartix[0], &ysTemp);
+    num_mul_matrix(ysTemp,1/2, &ysTemp);
+    
+    assign_martix(ysTemp, &tempMartix[1]);
 
     mul_maritx(tempMartix[1], tempMartix[0], &tempMartix[2]);
     num_mul_matrix(tempMartix[2], 1/6, &tempMartix[2]);
@@ -89,6 +96,21 @@ static int gesture_change(MARTIX six_freedom,MARTIX* lds,MARTIX* gestureChangeM)
     {
         add_maritx(*gestureChangeM, tempMartix[i], gestureChangeM);
     }
+    if (singleMartix.martix)
+    {
+        free(singleMartix.martix);
+        singleMartix.martix = NULL;
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        free(tempMartix[i].martix);
+        tempMartix[i].martix = NULL;
+    }
+    if (ysTemp.martix)
+    {
+        free(ysTemp.martix);
+        ysTemp.martix = NULL;
+    }
     return ret;
 }
 
@@ -100,28 +122,61 @@ static int six_freedom(MARTIX J_martix, MARTIX W_martix, MARTIX E_martix, MARTIX
     int ret = 0;
     MARTIX trs_J_martix;
     MARTIX temp_martix1;
-    MARTIX temp_martix2;
+    MARTIX temp_martix3;
+    temp_martix3.rows = 6;
+    temp_martix3.cols = 6;
+    //    printf("---%d---%d \n", temp_martix3.rows, temp_martix3.cols);
+    temp_martix3.martix = (float*)malloc(sizeof(float) * 36);
     MARTIX temp_converse_martix;
+    temp_converse_martix.cols = 6;
+    temp_converse_martix.rows = 6;
+    temp_converse_martix.martix = (float*)malloc(sizeof(float)*temp_converse_martix.cols*temp_converse_martix.rows);
+    
+    for (int i = 0; i < J_martix.rows; i++)
+    {
+        for (int j = 0; j < J_martix.cols; j++)
+        {
+            printf("%f-", J_martix.martix[i*J_martix.cols + j]);
+        }
+    }
+
+    for (int i = 0; i < W_martix.rows; i++)
+    {
+        for (int j = 0; j < W_martix.cols; j++)
+        {
+            printf("%f-", W_martix.martix[i*W_martix.cols + j]);
+        }
+    }
+
+    printf("%d---%d\n", temp_converse_martix.cols, temp_converse_martix.rows);
 
     trs_J_martix.cols = J_martix.rows;
     trs_J_martix.rows = J_martix.cols;
     trs_J_martix.martix = (float*)malloc(sizeof(float)*trs_J_martix.cols*trs_J_martix.rows);
     ret = translate_martix(J_martix, &trs_J_martix);
 
+
     temp_martix1.rows = 6;
     temp_martix1.cols = J_martix.cols;
     temp_martix1.martix = (float*)malloc(sizeof(float)*temp_martix1.cols*temp_martix1.rows);
     ret = mul_maritx(trs_J_martix, W_martix, &temp_martix1);
 
-    temp_martix2.rows = 6;
-    temp_martix2.cols = 6;
-    temp_martix2.martix = (float*)malloc(sizeof(float)*temp_martix2.cols*temp_martix2.rows);
-    ret = mul_maritx(temp_martix1, J_martix, &temp_martix2);
 
-    temp_converse_martix.cols = 6;
-    temp_converse_martix.rows = 6;
-    temp_converse_martix.martix = (float*)malloc(sizeof(float)*temp_converse_martix.cols*temp_converse_martix.rows);
-    ret = converse_martix(temp_martix2, &temp_converse_martix);
+//     int* tem = (int*)malloc(sizeof(int) * 100);
+//     memset(tem, 0, sizeof(int) * 100);
+ 
+    ret = mul_maritx(temp_martix1, J_martix, &temp_martix3);
+
+
+    for (int i = 0; i < temp_martix3.rows; i++)
+    {
+        for (int j = 0; j < temp_martix3.cols; j++)
+        {
+            printf("%f--", temp_martix3.martix[i*temp_martix3.cols + j]);
+        }
+    }
+
+    ret = converse_martix(temp_martix3, &temp_converse_martix);
 
     ret = mul_maritx(temp_converse_martix, trs_J_martix, &temp_martix1);
     ret = mul_maritx(temp_martix1, W_martix, &temp_martix1);
@@ -141,10 +196,10 @@ static int six_freedom(MARTIX J_martix, MARTIX W_martix, MARTIX E_martix, MARTIX
         free(temp_martix1.martix);
         temp_martix1.martix = NULL;
     }
-    if (temp_martix2.martix)
+    if (temp_martix3.martix)
     {
-        free(temp_martix2.martix);
-        temp_martix2.martix = NULL;
+        free(temp_martix3.martix);
+        temp_martix3.martix = NULL;
     }
     if (temp_converse_martix.martix)
     {
@@ -168,6 +223,7 @@ static int weight_error(int gesture_nnum, float* randomError,MARTIX* weight_mart
     for (int i = 0; i < gesture_nnum; i++)
     {
         weight_martix->martix[i*gesture_nnum + i] = 1 / (0.01 + randomError[i]);
+        printf("%f--", weight_martix->martix[i*gesture_nnum + i]);
     }
     return ret;
 }
@@ -175,8 +231,8 @@ static int weight_error(int gesture_nnum, float* randomError,MARTIX* weight_mart
 
 
 //最小二乘获取新位姿
-int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gesture, 
-    threespace *ModulePoint, float* randomError, int gesture_nnum,twospace* deviation, MARTIX* nxtGesture)
+int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gesture,
+    threespace *ModulePoint, float* randomError, int gesture_nnum, twospace* deviation, MARTIX* nxtGesture)
 {
     int ret = 0;
     if (!CameraSamplePoint || !ModulePoint)
@@ -203,34 +259,34 @@ int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gestu
 
     //构造6个李代数旋转矩阵
     MARTIX G[6];
-    G[1].rows = G[2].rows = G[3].rows = G[4].rows = G[5].rows = G[6].rows = 4;
-    G[1].cols = G[2].cols = G[3].cols = G[4].cols = G[5].cols = G[6].cols = 4;
+    G[0].rows = G[1].rows = G[2].rows = G[3].rows = G[4].rows = G[5].rows = 4;
+    G[0].cols = G[1].cols = G[2].cols = G[3].cols = G[4].cols = G[5].cols = 4;
+    G[0].martix = (float*)malloc(sizeof(float)*G[0].rows*G[0].cols);
+    memset(G[0].martix, 0, sizeof(float)*G[0].rows*G[0].cols);
+    G[0].martix[3] = 1;
+
     G[1].martix = (float*)malloc(sizeof(float)*G[1].rows*G[1].cols);
     memset(G[1].martix, 0, sizeof(float)*G[1].rows*G[1].cols);
-    G[1].martix[3] = 1;
+    G[1].martix[7] = 1;
 
     G[2].martix = (float*)malloc(sizeof(float)*G[2].rows*G[2].cols);
     memset(G[2].martix, 0, sizeof(float)*G[2].rows*G[2].cols);
-    G[2].martix[7] = 1;
+    G[2].martix[11] = 1;
 
     G[3].martix = (float*)malloc(sizeof(float)*G[3].rows*G[3].cols);
     memset(G[3].martix, 0, sizeof(float)*G[3].rows*G[3].cols);
-    G[3].martix[11] = 1;
+    G[3].martix[6] = -1;
+    G[3].martix[9] = 1;
 
     G[4].martix = (float*)malloc(sizeof(float)*G[4].rows*G[4].cols);
     memset(G[4].martix, 0, sizeof(float)*G[4].rows*G[4].cols);
-    G[4].martix[6] = -1;
-    G[4].martix[9] = 1;
+    G[4].martix[2] = 1;
+    G[4].martix[8] = -1;
 
     G[5].martix = (float*)malloc(sizeof(float)*G[5].rows*G[5].cols);
     memset(G[5].martix, 0, sizeof(float)*G[5].rows*G[5].cols);
-    G[5].martix[2] = 1;
-    G[5].martix[8] = -1;
-
-    G[6].martix = (float*)malloc(sizeof(float)*G[6].rows*G[6].cols);
-    memset(G[6].martix, 0, sizeof(float)*G[6].rows*G[6].cols);
-    G[6].martix[1] = -1;
-    G[6].martix[4] = 1;
+    G[5].martix[1] = -1;
+    G[5].martix[4] = 1;
 
     //缓存雅克比矩阵Jij
     MARTIX Jij;
@@ -247,13 +303,17 @@ int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gestu
         JP.rows = 2;
         JP.martix = (float*)malloc(sizeof(float)*JP.cols*JP.rows);
         JP.martix[0] = 1 / CameraSamplePoint[i].real_z;
+        printf("%f--", JP.martix[0]);
         JP.martix[1] = 0.0f;
         JP.martix[2] = -(CameraSamplePoint[i].real_x) / (pow(CameraSamplePoint[i].real_z, 2));
+        printf("%f--", JP.martix[2]);
         JP.martix[3] = 0.0f;
         JP.martix[4] = 0.0f;
         JP.martix[5] = 1 / CameraSamplePoint[i].real_z;
+        printf("%f--", JP.martix[5]);
         JP.martix[6] = -(CameraSamplePoint[i].real_y) / (pow(CameraSamplePoint[i].real_z, 2));
-        JP.martix[7] = 0;
+        printf("%f--", JP.martix[6]);
+        JP.martix[7] = 0.0f;
 
         //构建CAD模型可见的采集点矩阵Pi
         MARTIX Pi;
@@ -263,7 +323,7 @@ int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gestu
         Pi.martix[0] = ModulePoint[i].real_x;
         Pi.martix[1] = ModulePoint[i].real_y;
         Pi.martix[2] = ModulePoint[i].real_z;
-        Pi.martix[3] = 1;
+        Pi.martix[3] = 1.;
 
         //赋值误差矩阵
         E_martix.martix[i] = randomError[i];
@@ -277,13 +337,13 @@ int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gestu
             trs_ni.martix = (float*)malloc(sizeof(float)*trs_ni.cols*trs_ni.rows);
             trs_ni.martix[0] = deviation[i].real_x;
             trs_ni.martix[1] = deviation[i].real_y;
-            
+
             //niT*Jk缓存矩阵
             MARTIX output_martix1;
             output_martix1.rows = 1;
             output_martix1.cols = 2;
             output_martix1.martix = (float*)malloc(sizeof(float)*output_martix1.rows*output_martix1.cols);
-          
+
             //niT*Jk
             ret = mul_maritx(trs_ni, JK, &output_martix1);
 
@@ -293,8 +353,14 @@ int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gestu
             output_martix2.rows = 1;
             output_martix2.cols = 4;
             output_martix2.martix = (float*)malloc(sizeof(float)*output_martix2.rows*output_martix2.cols);
-            ret = mul_maritx(output_martix1, JP, &output_martix2);
-            ret= mul_maritx(output_martix2, gesture, &output_martix2);
+
+            MARTIX output_martix21;
+            output_martix21.rows = 1;
+            output_martix21.cols = 4;
+            output_martix21.martix = (float*)malloc(sizeof(float)*output_martix21.rows*output_martix21.cols);
+
+            ret = mul_maritx(output_martix1, JP, &output_martix21);
+            ret = mul_maritx(output_martix21, gesture, &output_martix2);
 
             //Gj*Pi的缓存矩阵
             MARTIX output_martix3;
@@ -338,7 +404,11 @@ int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gestu
                 free(result_martix.martix);
                 result_martix.martix = NULL;
             }
-
+            if (output_martix21.martix)
+            {
+                free(output_martix21.martix);
+                output_martix21.martix = NULL;
+            }
         }
 
         if (JP.martix)
@@ -359,7 +429,7 @@ int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gestu
     weight_martix.rows = gesture_nnum;
     weight_martix.martix = (float*)malloc(sizeof(float)*pow(gesture_nnum, 2));
     memset(weight_martix.martix, 0, sizeof(float)*pow(gesture_nnum, 2));
- 
+
     ret = weight_error(gesture_nnum, randomError, &weight_martix);
 
     //缓存六个自由度
@@ -367,6 +437,7 @@ int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gestu
     sixFreedom.cols = 1;
     sixFreedom.rows = 6;
     sixFreedom.martix = (float*)malloc(sizeof(float)*sixFreedom.cols*sixFreedom.rows);
+    memset(sixFreedom.martix, 0, sizeof(float)*sixFreedom.cols*sixFreedom.rows);
     //计算六个自由度
     ret = six_freedom(Jij, weight_martix, E_martix, &sixFreedom);
 
@@ -378,7 +449,7 @@ int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gestu
 
     //根据自由度计算姿态变化矩阵M
     ret = gesture_change(sixFreedom, G, &gestureChangeM);
-    
+
     //更新位姿
     ret = update_gesture(sixFreedom, gesture, nxtGesture, gestureChangeM);
 
@@ -403,10 +474,25 @@ int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gestu
         free(weight_martix.martix);
         weight_martix.martix = NULL;
     }
+    if (E_martix.martix)
+    {
+        free(E_martix.martix);
+        E_martix.martix = NULL;
+    }
     if (sixFreedom.martix)
     {
         free(sixFreedom.martix);
         sixFreedom.martix = NULL;
+    }
+    if (Jij.martix)
+    {
+        free(Jij.martix);
+        Jij.martix = NULL;
+    }
+    if (gestureChangeM.martix)
+    {
+        free(gestureChangeM.martix);
+        gestureChangeM.martix = NULL;
     }
     return ret;
 }

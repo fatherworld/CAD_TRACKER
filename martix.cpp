@@ -218,6 +218,7 @@ int num_mul_matrix(MARTIX input_martix, float scale,MARTIX* output_martix)
 //方阵的逆
 int converse_martix(MARTIX input_martix, MARTIX* output_martix)
 {
+   
     int ret = 0;
     if (!output_martix)
     {
@@ -232,25 +233,40 @@ int converse_martix(MARTIX input_martix, MARTIX* output_martix)
         output_martix->martix[0] = 1;
         return ret;
     }
+
+    MARTIX* follow_martixs;
+    follow_martixs= (MARTIX*)malloc(sizeof(MARTIX));
+    follow_martixs->cols = input_martix.cols;
+    follow_martixs->rows = input_martix.rows;
+   
+    follow_martixs->martix = (float*)malloc(sizeof(float)*follow_martixs->cols*follow_martixs->rows);
+//     printf("----%d---%d---", follow_martixs.cols, follow_martixs.rows);
+//     int num = sizeof(float)*follow_martixs.cols*follow_martixs.rows;
+//     printf("%d\n", num);
+
+//     printf("%d\n", sizeof(follow_martixs));
+//     (float*)calloc(144, 1);
+
     //求该矩阵的行列式
     float determinals = determinals_martix(input_martix, input_martix.cols);
     //行列式的倒数
     float converse_determinals = 1 / determinals;
    
-    MARTIX follow_martixs;
-    follow_martixs.cols = input_martix.cols;
-    follow_martixs.rows = input_martix.rows;
-    follow_martixs.martix = (float*)malloc(sizeof(float)*input_martix.cols*input_martix.rows);
-    ret = follow_martix(input_martix, &follow_martixs);
+
+    ret = follow_martix(input_martix, follow_martixs);
     if (ret)
     {
         printf("求伴随矩阵出错\n");
     }
-    ret = num_mul_matrix(follow_martixs, converse_determinals,output_martix);//最终的结果
-    if (follow_martixs.martix)
+    ret = num_mul_matrix(*follow_martixs, converse_determinals,output_martix);//最终的结果
+    if (follow_martixs)
     {
-        free(follow_martixs.martix);
-        follow_martixs.martix = NULL;
+        if (follow_martixs->martix)
+        {
+            free(follow_martixs->martix);
+            follow_martixs->martix = NULL;
+        }
+        follow_martixs = NULL;
     }
     return ret;
 }

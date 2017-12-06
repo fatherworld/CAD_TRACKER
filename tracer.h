@@ -21,7 +21,8 @@ extern "C"
     pragma seven:法向量
     pragma eight:后一帧的姿态
     */
-    int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gesture, twospace *ModulePoint, MARTIX randomError,int gesture_nnum, twospace* deviation,MARTIX* nxtGesture);
+    int leastSquares(MARTIX internalRef, threespace* CameraSamplePoint, MARTIX gesture, 
+        threespace *ModulePoint, float* randomError,int gesture_nnum, twospace* deviation,MARTIX* nxtGesture);
    
 #ifdef __cplusplus
 #if __cplusplus
