@@ -71,8 +71,7 @@ void test_leastSq()
     CameraSamplePoint.cols = 74;
     CameraSamplePoint.rows = 4;
     CameraSamplePoint.martix = (float*)malloc(sizeof(float)*ModulePointMartix.rows*ModulePointMartix.cols);
-    //世界坐标乘以RT矩阵获取相机坐标矩阵
-    ret = mul_maritx(ModulePointMartix, ModulePointMartix, &CameraSamplePoint);
+   
 
     //法向量：
     MARTIX deviation;
@@ -95,6 +94,7 @@ void test_leastSq()
     {
         //获取CAD模型可见点集
         ModulePointMartix.martix[0 * 74 + i] = OutForMartix[i].d3Point.v[0];
+//        printf("%f \n", OutForMartix[i].d3Point.v[0]);
         ModulePointMartix.martix[1 * 74 + i] = OutForMartix[i].d3Point.v[1];
         ModulePointMartix.martix[2 * 74 + i] = OutForMartix[i].d3Point.v[2];
         ModulePointMartix.martix[3 * 74 + i] = 1;
@@ -107,6 +107,8 @@ void test_leastSq()
         randomError.martix[i] = sqrt(pow(randx, 2) + pow(randy, 2));
     }
 
+    //世界坐标乘以RT矩阵获取相机坐标矩阵
+    ret = mul_maritx(outerRef, ModulePointMartix, &CameraSamplePoint);
 
     //下一帧的姿态信息
     MARTIX nxtGesture;
@@ -531,22 +533,52 @@ void test_converse()
 {
     int ret = 0;
     MARTIX input_data, output_data;
-    output_data.rows = 3;
-    output_data.cols = 3;
+    output_data.rows = 4;
+    output_data.cols = 4;
     output_data.martix = (float*)malloc(sizeof(double)*output_data.rows * output_data.cols);
 
-    input_data.rows = 3;
-    input_data.cols = 3;
+    input_data.rows =4;
+    input_data.cols =4;
     input_data.martix = (float*)malloc(sizeof(double)*input_data.rows * input_data.cols);
-    input_data.martix[0] = 2;
-    input_data.martix[1] = 4;
-    input_data.martix[2] = 7;
-    input_data.martix[3] = 1;
-    input_data.martix[4] = 3;
-    input_data.martix[5] = 2;
-    input_data.martix[6] = 5;
-    input_data.martix[7] = 0;
-    input_data.martix[8] = 4;
+    input_data.martix[0] = -1.0f;
+    input_data.martix[1] = 3.0f;
+    input_data.martix[2] = -7.0f;
+    input_data.martix[3] = 10.0f;
+    input_data.martix[4] = -7.0f;
+    input_data.martix[5] = -3.0f;
+    input_data.martix[6] = 5.0f;
+    input_data.martix[7] = 10.0f;
+    input_data.martix[8] = 3.0f;
+    input_data.martix[9] = 1.0f;
+    input_data.martix[10] = -1.0f;
+    input_data.martix[11] = 2.0f;
+    input_data.martix[12] = 1.0f;
+    input_data.martix[13] = 1.0f;
+    input_data.martix[14] = -1.0f;
+    input_data.martix[15] = 2.0f;
+
+//     input_data.martix[0] = -2.0f;
+//     input_data.martix[1] = 2.0f;
+//     input_data.martix[2] = -4.0f;
+//     input_data.martix[3] = 0.0f;
+//     input_data.martix[4] = 2.0f;
+//     input_data.martix[5] = 1.0f;
+//     input_data.martix[6] = 2.0f;
+//     input_data.martix[7] = 0.0f;
+//     input_data.martix[8] = 4.0f;
+//     input_data.martix[9] = 3.0f;
+//     input_data.martix[10] = 1.0f;
+//     input_data.martix[11] = 2.0f;
+//     input_data.martix[12] = 3.0f;
+//     input_data.martix[13] = 1.0f;
+//     input_data.martix[14] = 2.0f;
+//     input_data.martix[15] = 4.0f;
+
+//     input_data.martix[4] = 3;
+//     input_data.martix[5] = 2;
+//     input_data.martix[6] = 5;
+//     input_data.martix[7] = 0;
+//     input_data.martix[8] = 4;
 
     ret=converse_martix(input_data,&output_data);
     for (int i = 0; i < output_data.rows; i++)
@@ -560,10 +592,7 @@ void test_converse()
 
 void test_similarity()
 {
-//     int ret = 0;
-//     ret = findMaxSimilar(float* source_data, int source_width, int source_height,
-//         float* module_data, int module_width, int module_height, int offset_x,
-//         int offset_y, int step, Similarity* max_similarity);
+
 }
 
 void hanoi(int n, int firstA, int secondB, int thirdC)
@@ -584,8 +613,7 @@ void hanoi(int n, int firstA, int secondB, int thirdC)
 int main()
 {
 
- 
-    test_leastSq();
+    test_converse();
  //   test_converse();
  //    test_assignMartix();
 //    test_numMulMatrix();

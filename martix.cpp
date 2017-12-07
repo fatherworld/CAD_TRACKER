@@ -61,7 +61,7 @@ int add_maritx(MARTIX input_martix_left, MARTIX input_martix_right, MARTIX* outp
     {
         for (int j = 0; j < input_martix_left.cols; j++)
         {
-            int temp = input_martix_left.martix[i*input_martix_left.cols + j] + input_martix_right.martix[i*input_martix_right.cols + j];
+            float temp = input_martix_left.martix[i*input_martix_left.cols + j] + input_martix_right.martix[i*input_martix_right.cols + j];
             output_martix->martix[i*input_martix_left.cols + j] = temp;
         }
     }
@@ -93,7 +93,7 @@ int sub_maritx(MARTIX input_martix_left, MARTIX input_martix_right, MARTIX* outp
     {
         for (int j = 0; j < input_martix_left.cols; j++)
         {
-            int temp = input_martix_left.martix[i*input_martix_left.cols + j] - input_martix_right.martix[i*input_martix_right.cols + j];
+            float temp = input_martix_left.martix[i*input_martix_left.cols + j] - input_martix_right.martix[i*input_martix_right.cols + j];
             output_martix->martix[i*input_martix_left.cols + j] = temp;
         }
     }
@@ -113,7 +113,7 @@ float determinals_martix(MARTIX input_martix,int n)
     temp_martix.rows = input_martix.rows-1;
     temp_martix.martix = (float*)malloc(sizeof(float)*(n-1)*(n-1));
     memset(temp_martix.martix, 0, (n - 1)*(n - 1)*sizeof(float));
-    float result = 0;
+    float result = 0.0f;
     for (int i = 0; i < n; i++)
     {
         for (int j = 0; j < n-1; j++)
@@ -122,6 +122,7 @@ float determinals_martix(MARTIX input_martix,int n)
             {
                 int tempk = (k >= i ? k + 1 : k); 
                 temp_martix.martix[j*(n-1) + k] = input_martix.martix[(j + 1)*n + tempk];
+            //    printf("%f=", temp_martix.martix[j*(n - 1) + k]);
             }
         }
         float temp = determinals_martix(temp_martix, n - 1);//此时求的是余子式
@@ -142,6 +143,7 @@ float determinals_martix(MARTIX input_martix,int n)
     }
     return result;
 }
+
 
 
 //求方阵的伴随矩阵
@@ -176,11 +178,11 @@ int follow_martix(MARTIX input_martix, MARTIX* output_martix)
             float temp = determinals_martix(temp_martix, temp_martix.cols);
             if ((i + j) % 2 == 0)
             {
-                output_martix->martix[j*input_martix.cols + i] = input_martix.martix[i*input_martix.cols + j] * temp;
+                output_martix->martix[j*input_martix.cols + i] = temp;
             }
             else
             {
-                output_martix->martix[j*input_martix.cols + i] = -input_martix.martix[i*input_martix.cols + j] * temp;
+                output_martix->martix[j*input_martix.cols + i] = -temp;
             }
             if (temp_martix.martix)
             {
@@ -189,9 +191,11 @@ int follow_martix(MARTIX input_martix, MARTIX* output_martix)
             }
         }
     }
-
     return ret;
 }
+
+
+
 
 
 //数乘矩阵运算
@@ -208,7 +212,7 @@ int num_mul_matrix(MARTIX input_martix, float scale,MARTIX* output_martix)
     {
         for (int j = 0; j < input_martix.cols; j++)
         {
-            output_martix->martix[i*output_martix->cols + j]= input_martix.martix[i*input_martix.cols + j] * scale;
+            output_martix->martix[i*output_martix->cols + j]= (float)input_martix.martix[i*input_martix.cols + j] * scale;
         }
     }
     return ret;
@@ -240,18 +244,15 @@ int converse_martix(MARTIX input_martix, MARTIX* output_martix)
     follow_martixs->rows = input_martix.rows;
    
     follow_martixs->martix = (float*)malloc(sizeof(float)*follow_martixs->cols*follow_martixs->rows);
-//     printf("----%d---%d---", follow_martixs.cols, follow_martixs.rows);
-//     int num = sizeof(float)*follow_martixs.cols*follow_martixs.rows;
-//     printf("%d\n", num);
-
-//     printf("%d\n", sizeof(follow_martixs));
-//     (float*)calloc(144, 1);
+     
 
     //求该矩阵的行列式
     float determinals = determinals_martix(input_martix, input_martix.cols);
-    //行列式的倒数
-    float converse_determinals = 1 / determinals;
-   
+//    printf("%f     ]", determinals);
+
+        //行列式的倒数
+    float converse_determinals = 1.0 / determinals;
+//    printf("%f >>>", converse_determinals);
 
     ret = follow_martix(input_martix, follow_martixs);
     if (ret)
@@ -319,4 +320,100 @@ int assign_martix(MARTIX input_martix, MARTIX* output_martix)
         }
     }
     return ret;
+}
+
+//R旋转向量和T平移向量转化为RT矩阵
+
+int RoAndTranToRT(float RotX, float RotY, float RotZ, float Tx, float Ty, float Tz, float RT[16])
+{
+    int i = 0;
+    int j = 0;
+    memset(RT, 0, sizeof(float) * 16);
+    float R[9] = { 0.0f };
+
+    EulerAng2Rotate_(RotX, RotY, RotZ, R);
+    for (i = 0; i < 3; i++)
+    {
+        for (j = 0; j < 3; j++)
+        {
+            RT[i * 4 + j] = R[i * 3 + j];
+        }
+    }
+    RT[3] = Tx;
+    RT[7] = Ty;
+    RT[11] = Tz;
+    RT[15] = 1.0f;
+    return 0;
+}
+
+
+// 角度转化为旋转矩阵
+int EulerAng2Rotate_(float RotX, float RotY, float RotZ, float R[9])
+{
+    float CV_PI = 3.1415926f;
+    RotX = RotX*CV_PI / 180.0;
+    RotY = RotY*CV_PI / 180.0;
+    RotZ = RotZ*CV_PI / 180.0;
+
+    float Cx, Sx, Cy, Sy, Cz, Sz;
+    Cx = cos(RotX); Sx = sin(RotX);
+    Cy = cos(RotY); Sy = sin(RotY);
+    Cz = cos(RotZ); Sz = sin(RotZ);
+
+
+    float Mz[9] = { 0.0f };
+    Mz[0] = Cz;
+    Mz[1] = -Sz;
+    Mz[1 * 3] = Sz;
+    Mz[1 * 3 + 1] = Cz;
+    Mz[2 * 3 + 2] = 1;
+
+
+    float Mx[9] = { 0.0f };
+    float My[9] = { 0.0f };
+    My[0] = Cy;
+    My[2] = Sy;
+    My[1 * 3 + 1] = 1;
+    My[2 * 3 + 0] = -Sy;
+    My[2 * 3 + 2] = Cy;
+
+    Mx[0] = 1;
+    Mx[1 * 3 + 1] = Cx;
+    Mx[1 * 3 + 2] = -Sx;
+    Mx[2 * 3 + 1] = Sx;
+    Mx[2 * 3 + 2] = Cx;
+
+
+    float outTemp[9] = { 0.0f };
+    float out[9] = { 0.0f };
+
+    MARTIX input_martix_one, input_martix_two, input_martix_third, output_martix, output_temp;
+
+    input_martix_one.cols = 3;
+    input_martix_one.rows = 3;
+    input_martix_one.martix = Mx;
+
+    input_martix_two.cols = 3;
+    input_martix_two.rows = 3;
+    input_martix_two.martix = My;
+
+    input_martix_third.cols = 3;
+    input_martix_third.rows = 3;
+    input_martix_third.martix = Mz;
+
+    output_temp.cols = 3;
+    output_temp.rows = 3;
+    output_temp.martix = outTemp;
+
+    output_martix.cols = 3;
+    output_martix.rows = 3;
+    output_martix.martix = out;
+
+
+    mul_maritx(input_martix_third, input_martix_two, &output_temp);
+
+    mul_maritx(output_temp, input_martix_one, &output_martix);
+
+    memcpy(R, output_martix.martix, sizeof(float) * 9);
+    return 0;
 }
